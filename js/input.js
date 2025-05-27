@@ -1,7 +1,9 @@
 "use strict";
 
 // ト音記号画像のパス
-const trebleClefImagePath = "../img/to-onkigou.png";
+const trebleClefImagePath = "img/to-onkigou.png";
+// Go Live用パス
+// const trebleClefImagePath = "../img/to-onkigou.png";
 
 // 上から一つ目の五線譜の一本目の線の縦軸(単位:pixel)
 const initialY = 50;
