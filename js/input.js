@@ -46,16 +46,16 @@ function process(x, y) {
 // onMouseUp="endDraw(event)" で実行します
 // -------------------------------------------------------------
 //mousedownチェック用
-var mouseDown = false;
+let mouseDown = false;
 //マウス座標保存用
-var wbound = 0;
-var stX = 0;
-var stY = 0;
-var x = 0;
-var y = 0;
+let wbound = 0;
+let stX = 0;
+let stY = 0;
+let x = 0;
+let y = 0;
 //canvas要素保存用
-var canvas;
-var context;
+let canvas;
+let context;
 //描画の開始
 function startDraw(event) {
     //マウスボタンが押された
@@ -117,9 +117,9 @@ function drawImage(x, y) {
 
 
 function drawHorizontalLine(y) {
-    var canvas = document.getElementById('drawarea');
+    let canvas = document.getElementById('drawarea');
     if (canvas.getContext) {
-        var ctx = canvas.getContext('2d');
+        let ctx = canvas.getContext('2d');
         //輪郭線
         ctx.beginPath();
         ctx.moveTo(0, y);
