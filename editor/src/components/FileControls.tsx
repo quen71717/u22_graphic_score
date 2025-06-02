@@ -2,7 +2,7 @@ import React from "react";
 import { useScore } from "../context/ScoreContext";
 
 const FileControls: React.FC = () => {
-  const { saveMEI, saveMusicXML } = useScore();
+  const { saveMEI, saveMusicXML, saveMIDI } = useScore(); // saveMIDI をインポート
 
   return (
     <div className="file-controls p-2 bg-white dark:bg-gray-800 rounded shadow-md">
@@ -21,6 +21,12 @@ const FileControls: React.FC = () => {
           className="px-2 py-1 text-xs bg-purple-500 hover:bg-purple-600 text-white rounded transition-colors"
         >
           MusicXML形式で保存
+        </button>
+        <button
+          onClick={saveMIDI}
+          className="px-2 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
+        >
+          MIDI 出力
         </button>
       </div>
     </div>

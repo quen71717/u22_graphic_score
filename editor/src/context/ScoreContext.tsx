@@ -18,6 +18,7 @@ interface ScoreContextType {
   removeBeam: (noteId: string) => void;
   saveMEI: () => void;
   saveMusicXML: () => void;
+  saveMIDI: () => void;
 }
 
 const ScoreContext = createContext<ScoreContextType>({
@@ -37,6 +38,7 @@ const ScoreContext = createContext<ScoreContextType>({
   removeBeam: () => {},
   saveMEI: () => {},
   saveMusicXML: () => {},
+  saveMIDI: () => {},
 });
 
 export const useScore = () => useContext(ScoreContext);
@@ -749,6 +751,50 @@ export const ScoreProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  // Base64 を Uint8Array に変換するヘルパー関数
+  const base64ToUint8Array = (base64: string): Uint8Array => {
+    const binaryStr = atob(base64);
+    const len = binaryStr.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryStr.charCodeAt(i);
+    }
+    return bytes;
+  };
+
+  // MIDI形式で保存する関数（Base64 デコード版）
+  const saveMIDI = () => {
+    if (!toolkit || !scoreData) {
+      console.error("Toolkit or score data not available");
+      return;
+    }
+
+    try {
+      // Verovio toolkitから MIDI データを取得（Base64 エンコードされた文字列）
+      const midiStr = toolkit.renderToMIDI();
+
+      // Base64 をデコードして Uint8Array に変換
+      const midiData = base64ToUint8Array(midiStr);
+
+      // Blob を作成してダウンロード（MIDIの場合は "audio/midi" を指定）
+      const blob = new Blob([midiData], { type: "audio/midi" });
+      const url = URL.createObjectURL(blob);
+
+      // ダウンロードリンクを作成して自動クリック
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "score.mid";
+      document.body.appendChild(a);
+      a.click();
+
+      // クリーンアップ
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to save MIDI file:", error);
+    }
+  };
+
   return (
     <ScoreContext.Provider
       value={{
@@ -768,6 +814,7 @@ export const ScoreProvider: React.FC<{ children: React.ReactNode }> = ({
         removeBeam,
         saveMEI,
         saveMusicXML,
+        saveMIDI, // ← 新規追加
       }}
     >
       {children}
