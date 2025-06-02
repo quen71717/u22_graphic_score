@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
-import * as verovio from "verovio";
+import verovio from "verovio";
 
 interface ScoreContextType {
   scoreData: string;
@@ -41,7 +41,6 @@ const ScoreContext = createContext<ScoreContextType>({
 
 export const useScore = () => useContext(ScoreContext);
 
-// Default MEI score for new editor sessions
 const defaultMeiScore = `<?xml version="1.0" encoding="UTF-8"?>
 <mei xmlns="http://www.music-encoding.org/ns/mei" meiversion="4.0.0">
   <meiHead>
@@ -98,13 +97,38 @@ export const ScoreProvider: React.FC<{ children: React.ReactNode }> = ({
   const [totalPages, setTotalPages] = useState<number>(1);
   const [scale, setScale] = useState<number>(40);
 
-  // Initialize Verovio toolkit
+  // Initialize Verovio toolkit with waiting for WASM module to be ready
   useEffect(() => {
+    const waitForSuccessfulToolkitConstruction = async (
+      toolkitConstructor: any
+    ): Promise<any> => {
+      while (true) {
+        try {
+          // 一度インスタンスを生成してみる
+          const instance = new toolkitConstructor();
+          // 生成に成功したら破棄してポーリング終了
+          return instance;
+        } catch (error) {
+          console.warn("Toolkit construction failed; retrying...", error);
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+      }
+    };
+
     const initializeVerovio = async () => {
       try {
-        // Instantiate Verovio toolkit (cast to any to bypass TS type definitions)
-        const tk = new verovio.toolkit();
+        // await verovio.ready;
+        console.log("Verovio is ready via verovio.ready");
+        const toolkitConstructor = verovio.toolkit;
+        if (!toolkitConstructor) {
+          throw new Error("Toolkit constructor is not available.");
+        }
+        // 安全にインスタンス生成できるまでポーリング
 
+        console.log("Toolkit constructor can be called without errors");
+        const tk = await waitForSuccessfulToolkitConstruction(
+          toolkitConstructor
+        );
         setToolkit(tk);
       } catch (error) {
         console.error("Failed to initialize Verovio toolkit:", error);
@@ -119,32 +143,22 @@ export const ScoreProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!toolkit || !scoreData) return;
 
     try {
-      // Set options for the Verovio toolkit
       toolkit.setOptions({
         scale: scale,
         adjustPageHeight: true,
         footer: "none",
-        // 自動連桁（ビーミング）の設定を追加
-        // autoBeam: true, // 自動連桁を有効化
-        // beamRests: true, // 休符を含めてビームを作成（オプション）
-        // beamMaxSlope: 10, // ビームの最大傾斜角度
-        // beamMinSlope: 0, // ビームの最小傾斜角度
       });
 
-      // Load the MEI data
       toolkit.loadData(scoreData);
 
-      // Get page count and update total pages
       const pages = toolkit.getPageCount();
       setTotalPages(pages);
 
-      // Make sure current page is valid
       const validPage = Math.min(currentPage, pages);
       if (validPage !== currentPage) {
         setCurrentPage(validPage);
       }
 
-      // Render the score as SVG
       const svg = toolkit.renderToSVG(validPage);
       setSvgOutput(svg);
     } catch (error) {
