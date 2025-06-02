@@ -1,5 +1,34 @@
 "use strict";
 
+class Note {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+
+
+
+        this.#method();
+
+        window.addEventListener('mousedown', this.#handleMouseDown.bind(this, x, y));
+        window.addEventListener('mouseup', this.#handleMouseUp.bind(this, x, y));
+    }
+
+    #method() {
+        console.log("hello")
+    }
+
+    #handleMouseDown(event, x, y) {
+        // stX = event.clientX - wbound.left;
+        // stY = event.clientY - wbound.top;
+        console.log("mousedown",event, x, y.clientX);
+    }
+
+    #handleMouseUp(event, x, y) {
+        console.log('mouseup', event, x, y);
+    }
+}
+
+
 // ト音記号画像のパス
 const trebleClefImagePath = "img/to-onkigou.png";
 
@@ -21,13 +50,6 @@ let noteDataArray = [];
 
 const timeIntervalMS = 100;
 
-
-class Note {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-}
 
 function process(x, y) {
     let currentDate = new Date();
@@ -143,4 +165,8 @@ function page(initialY, lineInterval, staffInterval, num, kigouX) {
     }
 }
 
+
+
 page(initialY, lineInterval, staffInterval, num, kigouX);
+
+const myObject = new Note();
