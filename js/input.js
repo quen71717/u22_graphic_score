@@ -1,32 +1,32 @@
 "use strict";
 
-class Note {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
+// class Note {
+//     constructor(x, y) {
+//         this.x = x;
+//         this.y = y;
 
 
 
-        this.#method();
+//         this.#method();
 
-        window.addEventListener('mousedown', this.#handleMouseDown.bind(this, x, y));
-        window.addEventListener('mouseup', this.#handleMouseUp.bind(this, x, y));
-    }
+//         window.addEventListener('mousedown', this.#handleMouseDown.bind(this, x, y));
+//         window.addEventListener('mouseup', this.#handleMouseUp.bind(this, x, y));
+//     }
 
-    #method() {
-        console.log("hello")
-    }
+//     #method() {
+//         console.log("hello")
+//     }
 
-    #handleMouseDown(event, x, y) {
-        // stX = event.clientX - wbound.left;
-        // stY = event.clientY - wbound.top;
-        console.log("mousedown",event, x, y.clientX);
-    }
+//     #handleMouseDown(event, x, y) {
+//         // stX = event.clientX - wbound.left;
+//         // stY = event.clientY - wbound.top;
+//         console.log("mousedown",event, x, y.clientX);
+//     }
 
-    #handleMouseUp(event, x, y) {
-        console.log('mouseup', event, x, y);
-    }
-}
+//     #handleMouseUp(event, x, y) {
+//         console.log('mouseup', event, x, y);
+//     }
+// }
 
 
 // ト音記号画像のパス
@@ -169,4 +169,4 @@ function page(initialY, lineInterval, staffInterval, num, kigouX) {
 
 page(initialY, lineInterval, staffInterval, num, kigouX);
 
-const myObject = new Note();
+// const myObject = new Note();
