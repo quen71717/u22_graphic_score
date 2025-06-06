@@ -1,0 +1,30 @@
+{
+  "name": "u22_graphic_score",
+  "version": "1.0.0",
+  "main": "vite.config.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quen71717/u22_graphic_score.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/quen71717/u22_graphic_score/issues"
+  },
+  "homepage": "https://github.com/quen71717/u22_graphic_score#readme",
+  "description": "",
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.5.1",
+    "vite": "^6.3.5"
+  }
+}

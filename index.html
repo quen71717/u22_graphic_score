@@ -1,22 +1,13 @@
-<!DOCTYPE html>
-<html lang="jp">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>楽譜</title>
-
-    <link rel="stylesheet" href="css/style.css">
-    <script defer type="text/javascript" src="js/input.js"></script>
-</head>
-
-<body>
-    <div class="wrapper">
-        <canvas id="drawarea" width="1000" height="2000" onMouseDown="startDraw(event)" onMouseMove="Draw(event)"
-            onMouseUp="endDraw(event)">
-            五線譜のページ
-        </canvas>
-    </div>
-</body>
-
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>図形譜アプリ (React + Vite)</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
