@@ -3,12 +3,12 @@ import React, { useRef, useEffect, useState } from 'react';
     // キャンバスのサイズと
     const canvasWidth = 1000;
     const canvasHeight = 2000;
-    const trebleClefImagePath = "/images/to-onkigou.png";
+    const trebleClefImagePath = "/images/20131.png";
     const initialY = 50;
     const lineInterval = 20;
     const staffInterval = 200;
     const numStaves = 10;
-    const clefX = -50;
+    const clefX = 30;
 
 
 const DrawableCanvas = ({ onDraw }) => {
@@ -29,7 +29,7 @@ const DrawableCanvas = ({ onDraw }) => {
 
         const drawHorizontalLine = (y) => {
             ctx.beginPath();
-            ctx.moveTo(0, y);
+            ctx.moveTo(clefX, y);
             ctx.lineTo(canvasWidth, y);
             ctx.strokeStyle = "#000000";
             ctx.lineWidth = 1;
@@ -51,8 +51,13 @@ const DrawableCanvas = ({ onDraw }) => {
                 const currentStaffY = initialY + i * staffInterval;
                 fiveLinedStaff(currentStaffY);
                 if (clefImageLoaded) {
-                    ctx.drawImage(clefImage, clefX + 20, currentStaffY - lineInterval * 1.5, clefImage.width * 0.1, clefImage.height * 0.1); // サイズ調整例
-                } else if (trebleClefImagePath !== "/images/to-onkigou.png") {
+                    // 20131.pngの画像基準での調整
+                    const targetHeight = lineInterval * 7;
+                    const scale = targetHeight / 2771;
+                    const targetWidth = 1041 * scale;
+                    const yOffset = currentStaffY - (targetHeight / 2) + (lineInterval * 2);
+                    ctx.drawImage(clefImage, clefX, yOffset, targetWidth, targetHeight);
+                } else if (trebleClefImagePath !== "/images/20131.png") {
                     console.warn(`Treble clef image not loaded yet: ${trebleClefImagePath}`);
                 }
             }
