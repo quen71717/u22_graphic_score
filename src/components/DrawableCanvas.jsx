@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState } from 'react';
     // キャンバスのサイズと
     const canvasWidth = 1000;
     const canvasHeight = 2000;
-    const trebleClefImagePath = "/to-onkigou.png";
+    const trebleClefImagePath = "/images/to-onkigou.png";
     const initialY = 50;
     const lineInterval = 20;
     const staffInterval = 200;
@@ -52,7 +52,7 @@ const DrawableCanvas = ({ onDraw }) => {
                 fiveLinedStaff(currentStaffY);
                 if (clefImageLoaded) {
                     ctx.drawImage(clefImage, clefX + 20, currentStaffY - lineInterval * 1.5, clefImage.width * 0.1, clefImage.height * 0.1); // サイズ調整例
-                } else if (trebleClefImagePath !== "/to-onkigou.png") {
+                } else if (trebleClefImagePath !== "/images/to-onkigou.png") {
                     console.warn(`Treble clef image not loaded yet: ${trebleClefImagePath}`);
                 }
             }
@@ -60,17 +60,16 @@ const DrawableCanvas = ({ onDraw }) => {
 
         clefImage.onload = () => {
             clefImageLoaded = true;
-            drawPage(); // 画像読み込み後に再描画
+            drawPage();
         };
         clefImage.onerror = () => {
             console.error(`Failed to load treble clef image: ${trebleClefImagePath}`);
-            drawPage(); // 画像がなくても五線譜は描画
+            drawPage();
         }
 
-        drawPage(); // 初期描画
+        drawPage();
 
-    }, [trebleClefImagePath, initialY, lineInterval, staffInterval, numStaves, clefX]); // 依存配列
-
+    }, [trebleClefImagePath, initialY, lineInterval, staffInterval, numStaves, clefX]);
     const getMousePosition = (event) => {
         const canvas = canvasRef.current;
         const rect = canvas.getBoundingClientRect();
@@ -121,8 +120,8 @@ const DrawableCanvas = ({ onDraw }) => {
             onMouseDown={startDrawing}
             onMouseMove={draw}
             onMouseUp={endDrawing}
-            onMouseLeave={endDrawing} // キャンバス外に出た場合も描画終了
-            style={{ border: '1px solid #ccc', touchAction: 'none' }} // 基本的な枠線とタッチ操作無効化（スクロール防止のため）
+            onMouseLeave={endDrawing}
+            style={{ border: '1px solid #ccc', touchAction: 'none' }}
         />
     );
 };

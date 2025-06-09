@@ -18,6 +18,7 @@ function App() {
       <div className="canvas-wrapper">
         <DrawableCanvas onDraw={handleDraw} />
       </div>
+
     </div>
   );
 }
