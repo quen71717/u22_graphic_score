@@ -68,14 +68,24 @@ function App() {
       }
     }
 
+    const amplitude = Math.abs(
+      Math.min(...sample.map((coord) => coord.y)) -
+        Math.max(...sample.map((coord) => coord.y))
+    );
+
+    // 振幅が線一本分より大きい場合は、最後の座標を追加
+    if (amplitude > CANVAS_CONFIG.lineInterval / 2)
+      sample.push(coords[coords.length - 1]);
+
     return sample;
   };
 
   const calculatePitch = (offset, y) => {
     const normalizedY = y - offset;
-    // ピッチを計算するための基準値, C3が10個目のピッチのため
+    // ピッチを計算するための基準値, 一番上の線(F4)が10個目のピッチのため
     const pitch =
-      10 - Math.round((normalizedY - CANVAS_CONFIG.lineInterval / 4) / 10);
+      NOTES.F4 -
+      Math.round((normalizedY - CANVAS_CONFIG.lineInterval / 4) / 10);
 
     const note = Object.keys(NOTES).find((key) => {
       return NOTES[key] === pitch;
