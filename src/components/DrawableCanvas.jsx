@@ -1,18 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
+import { CANVAS_CONFIG } from "../App";
 
-// 定数は別ファイルに分離するか、コンポーネント内で宣言するのがベスト
-const CANVAS_CONFIG = {
-  width: 1000,
-  height: 2000,
-  trebleClefImagePath: "/images/20131.png",
-  initialY: 50,
-  lineInterval: 20,
-  staffInterval: 200,
-  numStaves: 10,
-  clefX: 30,
-};
-
-const DrawableCanvas = ({ onDraw }) => {
+const DrawableCanvas = ({ handleMouseMove, handleMouseLeave }) => {
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPosition, setLastPosition] = useState(null);
@@ -146,11 +135,11 @@ const DrawableCanvas = ({ onDraw }) => {
 
       setLastPosition(currentPosition);
 
-      if (onDraw) {
-        onDraw(currentPosition);
+      if (handleMouseMove) {
+        handleMouseMove(currentPosition);
       }
     },
-    [isDrawing, lastPosition, getMousePosition, onDraw]
+    [isDrawing, lastPosition, getMousePosition, handleMouseMove]
   );
 
   // 描画終了
@@ -166,7 +155,10 @@ const DrawableCanvas = ({ onDraw }) => {
       height={CANVAS_CONFIG.height}
       onMouseDown={startDrawing}
       onMouseMove={draw}
-      onMouseUp={endDrawing}
+      onMouseUp={() => {
+        endDrawing();
+        handleMouseLeave();
+      }}
       onMouseLeave={endDrawing}
       style={{ border: "1px solid #ccc", touchAction: "none" }}
     />
