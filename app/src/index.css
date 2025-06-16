@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased min-h-screen bg-gray-50 dark:bg-gray-900;
+  }
+}
+
+@layer components {
+  .app-container {
+    @apply max-w-full mx-auto h-screen flex flex-col;
+  }
+
+  .btn {
+    @apply px-3 py-1.5 rounded font-medium text-white transition-colors;
+  }
+
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-dark;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-600 hover:bg-gray-700;
+  }
+}
