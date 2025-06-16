@@ -57,7 +57,6 @@ const defaultMeiScore = `<?xml version="1.0" encoding="UTF-8"?>
             <measure n="1">
               <staff n="1">
                 <layer n="1">
-                  <note pname="c" oct="4" dur="4"/>
                 </layer>
               </staff>
             </measure>

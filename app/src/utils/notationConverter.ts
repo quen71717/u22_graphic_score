@@ -49,7 +49,7 @@ export const convertNotesToMEI = (notes: NoteInfo[]): string => {
       const oct = pitch.charAt(1);
 
       // 音符の間隔から音価を推測（簡易版）
-      const dur = "4"; // とりあえず4分音符固定
+      const dur = "8"; // とりあえず8分音符固定
 
       return `\n                  <note xml:id="n${index}" pname="${pname}" oct="${oct}" dur="${dur}"/>`;
     })
@@ -82,7 +82,6 @@ const getEmptyMEIScore = (): string => {
             <measure n="1">
               <staff n="1">
                 <layer n="1">
-                  <note pname="c" oct="4" dur="4"/>
                 </layer>
               </staff>
             </measure>
