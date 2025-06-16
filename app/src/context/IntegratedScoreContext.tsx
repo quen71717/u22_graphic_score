@@ -195,7 +195,7 @@ export const IntegratedScoreProvider: React.FC<{
   const downsampleCoordinates = (coords: Coordinate[]): Coordinate[] => {
     if (coords.length === 0) return [];
 
-    const NOTE_MIN_INTERVAL = 20;
+    const NOTE_MIN_INTERVAL = 50;
     const sample: Coordinate[] = [coords[0]];
     let lastX = coords[0].x;
 
@@ -212,20 +212,20 @@ export const IntegratedScoreProvider: React.FC<{
   // 座標から音符情報を計算
   const calculateNoteInfo = (coord: Coordinate): NoteInfo => {
     const NOTES: Record<string, number> = {
-      C3: 0,
-      D3: 1,
-      E3: 2,
-      F3: 3,
-      G3: 4,
-      A3: 5,
-      B3: 6,
-      C4: 7,
-      D4: 8,
-      E4: 9,
-      F4: 10,
-      G4: 11,
-      A4: 12,
-      B4: 13,
+      C4: 0,
+      D4: 1,
+      E4: 2,
+      F4: 3,
+      G4: 4,
+      A4: 5,
+      B4: 6,
+      C5: 7,
+      D5: 8,
+      E5: 9,
+      F5: 10,
+      G5: 11,
+      A5: 12,
+      B5: 13,
     };
 
     const CANVAS_CONFIG = {
@@ -235,7 +235,7 @@ export const IntegratedScoreProvider: React.FC<{
 
     const normalizedY = coord.y - CANVAS_CONFIG.initialY;
     const pitch =
-      NOTES.F4 -
+      NOTES.F5 -
       Math.round((normalizedY - CANVAS_CONFIG.lineInterval / 4) / 10);
 
     const noteName =
