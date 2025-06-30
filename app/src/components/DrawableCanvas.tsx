@@ -2,12 +2,9 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useIntegratedScore } from "../context/IntegratedScoreContext";
 
 interface DrawableCanvasProps {
-  width?: number;
-  height?: number;
-  resetKey?: number; 
+  resetKey?: number;
 }
 
-// キャンバス設定
 const CANVAS_CONFIG = {
   width: 1000,
   height: 2000,
@@ -20,14 +17,14 @@ const CANVAS_CONFIG = {
 };
 
 const DrawableCanvas: React.FC<DrawableCanvasProps> = ({
-  width = CANVAS_CONFIG.width,
-  height = CANVAS_CONFIG.height,
-  resetKey, // 追加
+  resetKey,
 }) => {
   const { drawnCoordinates, setDrawnCoordinates, generateScoreFromDrawing } =
     useIntegratedScore();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [canvasSize, setCanvasSize] = useState({ width: 1000, height: 2000 });
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [lastPosition, setLastPosition] = useState<{
     x: number;
@@ -35,6 +32,28 @@ const DrawableCanvas: React.FC<DrawableCanvasProps> = ({
   } | null>(null);
   const [clefImageLoaded, setClefImageLoaded] = useState<boolean>(false);
   const clefImageRef = useRef<HTMLImageElement | null>(null);
+
+  // ResizeObserverで親要素のサイズを監視
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const resize = () => {
+      setCanvasSize({
+        width: container.clientWidth,
+        height: container.clientHeight,
+      });
+    };
+
+    resize();
+
+    const observer = new window.ResizeObserver(resize);
+    observer.observe(container);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   // 水平線の描画
   const drawHorizontalLine = useCallback(
@@ -120,22 +139,22 @@ const DrawableCanvas: React.FC<DrawableCanvasProps> = ({
     if (!ctx) return;
 
     // Canvasのクリア
-    ctx.clearRect(0, 0, CANVAS_CONFIG.width, CANVAS_CONFIG.height);
+    ctx.clearRect(0, 0, canvasSize.width, canvasSize.height);
     ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(0, 0, CANVAS_CONFIG.width, CANVAS_CONFIG.height);
+    ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
 
     // 五線譜とクレフの描画
     drawStaffWithClef(ctx);
-  }, [drawStaffWithClef]);
+  }, [canvasSize, drawStaffWithClef]);
 
   // resetKeyが変わったらキャンバスを初期化
   useEffect(() => {
     if (!canvasRef.current) return;
     const ctx = canvasRef.current.getContext("2d");
     if (!ctx) return;
-    ctx.clearRect(0, 0, CANVAS_CONFIG.width, CANVAS_CONFIG.height);
+    ctx.clearRect(0, 0, canvasSize.width, canvasSize.height);
     ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(0, 0, CANVAS_CONFIG.width, CANVAS_CONFIG.height);
+    ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
     drawStaffWithClef(ctx);
   }, [resetKey, drawStaffWithClef]);
 
@@ -205,17 +224,19 @@ const DrawableCanvas: React.FC<DrawableCanvasProps> = ({
   }, [isDrawing, generateScoreFromDrawing]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={width}
-      height={height}
-      onMouseDown={startDrawing}
-      onMouseMove={draw}
-      onMouseUp={endDrawing}
-      onMouseLeave={endDrawing}
-      className="border border-gray-300 dark:border-gray-700 bg-white"
-      style={{ touchAction: "none" }}
-    />
+    <div ref={containerRef} style={{ width: "100%", height: "100%" }}>
+      <canvas
+        ref={canvasRef}
+        width={canvasSize.width}
+        height={canvasSize.height}
+        onMouseDown={startDrawing}
+        onMouseMove={draw}
+        onMouseUp={endDrawing}
+        onMouseLeave={endDrawing}
+        className="border border-gray-300 dark:border-gray-700 bg-white"
+        style={{ touchAction: "none", width: "100%", height: "100%" }}
+      />
+    </div>
   );
 };
 
