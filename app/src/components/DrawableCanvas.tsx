@@ -149,7 +149,7 @@ const DrawableCanvas: React.FC<DrawableCanvasProps> = ({
       setLastPosition(pos);
 
       // 座標の記録を開始
-      setDrawnCoordinates([pos]);
+      setDrawnCoordinates((prev) => [...prev, pos]);
     },
     [getMousePosition, setDrawnCoordinates]
   );
