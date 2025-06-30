@@ -58,14 +58,17 @@ const DrawableCanvas: React.FC<DrawableCanvasProps> = ({
   // 水平線の描画
   const drawHorizontalLine = useCallback(
     (ctx: CanvasRenderingContext2D, y: number) => {
+      // 終点を始点からclefX分だけ短くする
+      const startX = CANVAS_CONFIG.clefX;
+      const endX = canvasSize.width - CANVAS_CONFIG.clefX;
       ctx.beginPath();
-      ctx.moveTo(CANVAS_CONFIG.clefX, y);
-      ctx.lineTo(CANVAS_CONFIG.width, y);
+      ctx.moveTo(startX, y);
+      ctx.lineTo(endX, y);
       ctx.strokeStyle = "#000000";
       ctx.lineWidth = 1;
       ctx.stroke();
     },
-    []
+    [canvasSize.width]
   );
 
   // 五線譜の描画
