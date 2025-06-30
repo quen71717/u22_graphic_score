@@ -22,7 +22,7 @@ const CANVAS_CONFIG = {
 const DrawableCanvas: React.FC<DrawableCanvasProps> = ({
   width = CANVAS_CONFIG.width,
   height = CANVAS_CONFIG.height,
-  resetKey, 
+  resetKey, // 追加
 }) => {
   const { drawnCoordinates, setDrawnCoordinates, generateScoreFromDrawing } =
     useIntegratedScore();
