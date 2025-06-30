@@ -4,6 +4,7 @@ import { useIntegratedScore } from "../context/IntegratedScoreContext";
 interface DrawableCanvasProps {
   width?: number;
   height?: number;
+  resetKey?: number; 
 }
 
 // キャンバス設定
@@ -21,6 +22,7 @@ const CANVAS_CONFIG = {
 const DrawableCanvas: React.FC<DrawableCanvasProps> = ({
   width = CANVAS_CONFIG.width,
   height = CANVAS_CONFIG.height,
+  resetKey, 
 }) => {
   const { drawnCoordinates, setDrawnCoordinates, generateScoreFromDrawing } =
     useIntegratedScore();
@@ -125,6 +127,17 @@ const DrawableCanvas: React.FC<DrawableCanvasProps> = ({
     // 五線譜とクレフの描画
     drawStaffWithClef(ctx);
   }, [drawStaffWithClef]);
+
+  // resetKeyが変わったらキャンバスを初期化
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const ctx = canvasRef.current.getContext("2d");
+    if (!ctx) return;
+    ctx.clearRect(0, 0, CANVAS_CONFIG.width, CANVAS_CONFIG.height);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, CANVAS_CONFIG.width, CANVAS_CONFIG.height);
+    drawStaffWithClef(ctx);
+  }, [resetKey, drawStaffWithClef]);
 
   // マウス位置の取得
   const getMousePosition = useCallback(
