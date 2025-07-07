@@ -33,6 +33,8 @@ interface IntegratedScoreContextType {
 
   // 読み込み状態
   isVerovioReady: boolean;
+
+  saveMIDI: () => void;
 }
 
 const defaultMeiScore = `<?xml version="1.0" encoding="UTF-8"?>
@@ -81,6 +83,7 @@ const IntegratedScoreContext = createContext<IntegratedScoreContextType>({
   generateScoreFromDrawing: () => {},
   resetDrawing: () => {},
   isVerovioReady: false,
+  saveMIDI: () => {}
 });
 
 export const useIntegratedScore = () => useContext(IntegratedScoreContext);
@@ -254,6 +257,43 @@ export const IntegratedScoreProvider: React.FC<{
     setScoreData(defaultMeiScore);
   };
 
+  const base64ToUint8Array = (base64: string): Uint8Array => {
+    const binaryStr = atob(base64);
+    const len = binaryStr.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryStr.charCodeAt(i);
+    }
+    return bytes;
+  };
+
+  // MIDI形式で保存する関数
+  const saveMIDI = () => {
+    if (!toolkit || !scoreData) {
+      console.error("Toolkit or score data not available");
+      return;
+    }
+
+    try {
+      const midiStr = toolkit.renderToMIDI();
+      const midiData = base64ToUint8Array(midiStr);
+      const blob = new Blob([midiData], { type: "audio/midi" });
+      const url = URL.createObjectURL(blob);
+      // ダウンロードリンク
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "score.mid";
+      document.body.appendChild(a);
+      a.click();
+
+      // クリーンアップ
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to save MIDI file:", error);
+    }
+  };
+
   return (
     <IntegratedScoreContext.Provider
       value={{
@@ -270,6 +310,7 @@ export const IntegratedScoreProvider: React.FC<{
         generateScoreFromDrawing,
         resetDrawing,
         isVerovioReady,
+        saveMIDI,
       }}
     >
       {children}
