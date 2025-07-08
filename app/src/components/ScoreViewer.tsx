@@ -48,6 +48,8 @@ const ScoreViewer: React.FC<ScoreViewerProps> = ({
       note.addEventListener("mousedown", (event) => {
         const e = event as MouseEvent;
         dragState.current = { noteId: note.id, startY: e.clientY };
+        // ここでonNoteClickも呼ぶことで、ドラッグ開始時にも選択状態を即時反映
+        if (onNoteClick) onNoteClick(note.id);
       });
     });
     const handleMouseMove = (e: MouseEvent) => {

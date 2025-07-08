@@ -8,7 +8,6 @@ export const convertNotesToMEI = (notes: NoteInfo[]): string => {
 
   // 拍数計算用のヘルパー
   const getDurationValue = (dur: string) => {
-    // dur: "1"=全音符=4拍, "2"=2分=2拍, "4"=4分=1拍, "8"=8分=0.5拍, "16"=16分=0.25拍
     switch (dur) {
       case "1":
         return 4;
@@ -26,41 +25,74 @@ export const convertNotesToMEI = (notes: NoteInfo[]): string => {
         return 0.5;
     }
   };
+  // 逆変換: 拍数から最適な音価durを返す
+  const getBestDur = (beats: number) => {
+    if (beats >= 4) return "1";
+    if (beats >= 2) return "2";
+    if (beats >= 1) return "4";
+    if (beats >= 0.5) return "8";
+    if (beats >= 0.25) return "16";
+    return "32";
+  };
 
-  // 小節ごとに分割してMEIを生成
+  // notes: 分割前の元音符リスト
+  // 小節分割・タイ・休符はここでのみ付与
   const MEASURE_BEATS = 4; // 4/4拍子
   let measureCount = 1;
   let currentBeats = 0;
   let measureNotes: string[] = [];
   let allMeasures: string[] = [];
+  let tieIdCounter = 0;
 
   notes.forEach((note, index) => {
-    const { pitch, duration } = note as any;
+    let { pitch, duration } = note as any;
     const pname = pitch.charAt(0).toLowerCase();
     const oct = pitch.charAt(1);
-    const dur = duration || "8";
-    const noteXml = `\n                  <note xml:id="n${index}" pname="${pname}" oct="${oct}" dur="${dur}"/>`;
-    const beatVal = getDurationValue(dur);
-    if (currentBeats + beatVal > MEASURE_BEATS && measureNotes.length > 0) {
-      // 小節を閉じる
-      allMeasures.push(
-        `<measure n="${measureCount}">\n  <staff n="1">\n    <layer n="1">${measureNotes.join(
-          ""
-        )}\n    </layer>\n  </staff>\n</measure>`
-      );
-      measureCount++;
-      measureNotes = [];
-      currentBeats = 0;
+    let dur = duration || "8";
+    let beatsLeft = getDurationValue(dur);
+    let first = true;
+    let tieOpen = false;
+    while (beatsLeft > 0) {
+      const beatsInThisMeasure = Math.min(beatsLeft, MEASURE_BEATS - currentBeats);
+      const thisDur = getBestDur(beatsInThisMeasure);
+      const thisDurBeats = getDurationValue(thisDur);
+      // xml:idはn{index}_{分割番号}だが、UI側はn{index}のみを使う
+      let noteId = `n${index}`;
+      let tieAttr = "";
+      if (beatsLeft > thisDurBeats) {
+        tieAttr = ' tie="i"';
+        tieOpen = true;
+      } else if (tieOpen) {
+        tieAttr = ' tie="t"';
+        tieOpen = false;
+      }
+      measureNotes.push(`\n                  <note xml:id="${noteId}" pname="${pname}" oct="${oct}" dur="${thisDur}"${tieAttr}/>`);
+      currentBeats += thisDurBeats;
+      beatsLeft -= thisDurBeats;
+      first = false;
+      if (currentBeats >= MEASURE_BEATS) {
+        allMeasures.push(
+          `<measure n="${measureCount}">\n  <staff n="1">\n    <layer n="1">${measureNotes.join("")}\n    </layer>\n  </staff>\n</measure>`
+        );
+        measureCount++;
+        measureNotes = [];
+        currentBeats = 0;
+      }
     }
-    measureNotes.push(noteXml);
-    currentBeats += beatVal;
   });
-  // 最後の小節
+  // 小節の残りを休符で埋める
+  if (measureNotes.length > 0 && currentBeats < MEASURE_BEATS) {
+    let beatsRest = MEASURE_BEATS - currentBeats;
+    while (beatsRest > 0) {
+      const restDur = getBestDur(beatsRest);
+      const restBeats = getDurationValue(restDur);
+      measureNotes.push(`\n                  <rest dur="${restDur}"/>`);
+      beatsRest -= restBeats;
+    }
+  }
   if (measureNotes.length > 0) {
     allMeasures.push(
-      `<measure n="${measureCount}">\n  <staff n="1">\n    <layer n="1">${measureNotes.join(
-        ""
-      )}\n    </layer>\n  </staff>\n</measure>`
+      `<measure n="${measureCount}">\n  <staff n="1">\n    <layer n="1">${measureNotes.join("")}\n    </layer>\n  </staff>\n</measure>`
     );
   }
 
