@@ -4,11 +4,23 @@ import "../styles/score.css";
 
 interface ScoreViewerProps {
   className?: string;
+  onNoteClick?: (noteId: string) => void;
+  onNoteMove?: (noteId: string, steps: number) => void;
+  selectedNoteId?: string | null;
 }
 
-const ScoreViewer: React.FC<ScoreViewerProps> = ({ className = "" }) => {
+const ScoreViewer: React.FC<ScoreViewerProps> = ({
+  className = "",
+  onNoteClick,
+  onNoteMove,
+  selectedNoteId,
+}) => {
   const { svgOutput, isVerovioReady } = useIntegratedScore();
   const containerRef = useRef<HTMLDivElement>(null);
+  const dragState = useRef<{ noteId: string | null; startY: number }>({
+    noteId: null,
+    startY: 0,
+  });
 
   // SVG出力の更新
   useEffect(() => {
@@ -24,7 +36,54 @@ const ScoreViewer: React.FC<ScoreViewerProps> = ({ className = "" }) => {
       svg.style.height = "auto";
       svg.style.display = "block";
     }
-  }, [svgOutput]);
+
+    // 音符要素にイベント付与
+    const notes = containerRef.current.querySelectorAll(".note");
+    notes.forEach((note) => {
+      note.classList.add("cursor-pointer", "hover:opacity-80");
+      note.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (onNoteClick) onNoteClick(note.id);
+      });
+      note.addEventListener("mousedown", (event) => {
+        const e = event as MouseEvent;
+        dragState.current = { noteId: note.id, startY: e.clientY };
+      });
+    });
+    const handleMouseMove = (e: MouseEvent) => {
+      const { noteId, startY } = dragState.current;
+      if (noteId) {
+        const deltaY = startY - e.clientY;
+        if (Math.abs(deltaY) > 5 && onNoteMove) {
+          const steps = Math.sign(deltaY);
+          onNoteMove(noteId, steps);
+          dragState.current.startY = e.clientY;
+        }
+      }
+    };
+    const handleMouseUp = () => {
+      dragState.current.noteId = null;
+    };
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [svgOutput, onNoteClick, onNoteMove]);
+
+  // 選択音符のハイライト
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const notes = containerRef.current.querySelectorAll(".note");
+    notes.forEach((note) => {
+      if (selectedNoteId && note.id === selectedNoteId) {
+        note.setAttribute("fill", "red");
+      } else {
+        note.setAttribute("fill", "");
+      }
+    });
+  }, [selectedNoteId, svgOutput]);
 
   if (!isVerovioReady) {
     return (

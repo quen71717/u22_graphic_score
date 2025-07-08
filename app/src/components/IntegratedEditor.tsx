@@ -3,11 +3,14 @@ import DrawableCanvas from "./DrawableCanvas";
 import ScoreViewer from "./ScoreViewer";
 import NotationControls from "./NotationControls";
 import MidiControls from "./MidiControls";
+import NoteDurationControls from "./NoteDurationControls";
+import { useIntegratedScore } from "../context/IntegratedScoreContext";
 
 const IntegratedEditor: React.FC = () => {
   const [resetKey, setResetKey] = useState(0);
+  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
+  const { moveNoteByStep } = useIntegratedScore();
 
-  
   const handleReset = useCallback(() => {
     setResetKey((prev) => prev + 1);
   }, []);
@@ -29,7 +32,17 @@ const IntegratedEditor: React.FC = () => {
           <MidiControls />
         </div>
         <div className="flex-1 panel-body">
-          <ScoreViewer className="h-full" />
+          <ScoreViewer
+            className="h-full"
+            onNoteClick={setSelectedNoteId}
+            onNoteMove={moveNoteByStep}
+            selectedNoteId={selectedNoteId}
+          />
+          {selectedNoteId && (
+            <div className="p-2 border-t border-gray-200 dark:border-gray-700">
+              <NoteDurationControls selectedNoteId={selectedNoteId} />
+            </div>
+          )}
         </div>
         <NotationControls onReset={handleReset} />
       </div>

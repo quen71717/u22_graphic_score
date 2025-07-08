@@ -35,6 +35,12 @@ interface IntegratedScoreContextType {
   isVerovioReady: boolean;
 
   saveMIDI: () => void;
+
+  // 音符編集機能
+  moveNoteByStep: (noteId: string, steps: number) => void;
+  changeNoteDuration: (noteId: string, duration: string) => void;
+  addBeam: (noteId: string, beamCount: number) => void;
+  removeBeam: (noteId: string) => void;
 }
 
 const defaultMeiScore = `<?xml version="1.0" encoding="UTF-8"?>
@@ -83,7 +89,11 @@ const IntegratedScoreContext = createContext<IntegratedScoreContextType>({
   generateScoreFromDrawing: () => {},
   resetDrawing: () => {},
   isVerovioReady: false,
-  saveMIDI: () => {}
+  saveMIDI: () => {},
+  moveNoteByStep: () => {},
+  changeNoteDuration: () => {},
+  addBeam: () => {},
+  removeBeam: () => {},
 });
 
 export const useIntegratedScore = () => useContext(IntegratedScoreContext);
@@ -294,6 +304,60 @@ export const IntegratedScoreProvider: React.FC<{
     }
   };
 
+  // 音符のピッチを上下に動かす
+  const moveNoteByStep = (noteId: string, steps: number) => {
+    // noteIdは"n0"など。processedNotesのindexと対応している前提で実装
+    const index = Number(noteId.replace("n", ""));
+    if (isNaN(index) || !processedNotes[index]) return;
+
+    // 音高リスト
+    const NOTE_ORDER = [
+      "C4", "D4", "E4", "F4", "G4", "A4", "B4",
+      "C5", "D5", "E5", "F5", "G5", "A5", "B5"
+    ];
+    const currentPitch = processedNotes[index].pitch;
+    const currentIdx = NOTE_ORDER.indexOf(currentPitch);
+    if (currentIdx === -1) return;
+    let newIdx = currentIdx + steps;
+    newIdx = Math.max(0, Math.min(NOTE_ORDER.length - 1, newIdx));
+    const newPitch = NOTE_ORDER[newIdx];
+
+    // ノート情報を更新
+    const newNotes = processedNotes.map((note, i) =>
+      i === index ? { ...note, pitch: newPitch } : note
+    );
+    setProcessedNotes(newNotes);
+    // MEIデータも更新
+    const newMei = convertNotesToMEI(newNotes);
+    setScoreData(newMei);
+  };
+  // 音価変更
+  const changeNoteDuration = (noteId: string, duration: string) => {
+    // noteIdは"n0"など。processedNotesのindexと対応している前提で実装
+    const index = Number(noteId.replace("n", ""));
+    if (isNaN(index) || !processedNotes[index]) return;
+
+    // ノート情報を更新
+    // NoteInfoにdurationプロパティがなければ追加
+    const newNotes = processedNotes.map((note, i) =>
+      i === index ? { ...note, duration } : note
+    );
+    setProcessedNotes(newNotes);
+    // MEIデータも更新
+    const newMei = convertNotesToMEI(newNotes);
+    setScoreData(newMei);
+  };
+  // 連桁追加
+  const addBeam = (noteId: string, beamCount: number) => {
+    // TODO: MEIやノート情報に応じて実装
+    console.log(`addBeam: ${noteId}, ${beamCount}`);
+  };
+  // 連桁解除
+  const removeBeam = (noteId: string) => {
+    // TODO: MEIやノート情報に応じて実装
+    console.log(`removeBeam: ${noteId}`);
+  };
+
   return (
     <IntegratedScoreContext.Provider
       value={{
@@ -311,6 +375,10 @@ export const IntegratedScoreProvider: React.FC<{
         resetDrawing,
         isVerovioReady,
         saveMIDI,
+        moveNoteByStep, // 追加
+        changeNoteDuration, // 追加
+        addBeam,            // 追加
+        removeBeam,         // 追加
       }}
     >
       {children}
