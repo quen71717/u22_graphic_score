@@ -21,7 +21,6 @@ const NotationControls: React.FC<NotationControlsProps> = ({ onReset }) => {
             リセット
           </button>
         </div>
-
         <div className="flex space-x-2">
           <button onClick={zoomOut} className="btn btn-primary">
             縮小
