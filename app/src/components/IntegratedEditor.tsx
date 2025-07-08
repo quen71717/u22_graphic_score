@@ -9,11 +9,32 @@ import { useIntegratedScore } from "../context/IntegratedScoreContext";
 const IntegratedEditor: React.FC = () => {
   const [resetKey, setResetKey] = useState(0);
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
+  const [tooltipVisible, setTooltipVisible] = useState(false);
   const { moveNoteByStep } = useIntegratedScore();
 
   const handleReset = useCallback(() => {
     setResetKey((prev) => prev + 1);
   }, []);
+
+  // 楽譜クリック時: noteIdと座標をセットしツールチップ表示
+  const handleNoteClick = (noteId: string, pos: { x: number; y: number }) => {
+    setSelectedNoteId(noteId);
+    setTooltipPos(pos);
+    setTooltipVisible(true);
+  };
+
+  // 楽譜エリア外クリックでツールチップを閉じる
+  const handleScoreAreaClick = (e: React.MouseEvent) => {
+    // クリックがツールチップ内でなければ閉じる
+    if (!(e.target as HTMLElement).closest(".note-duration-controls")) {
+      setTooltipVisible(false);
+      setSelectedNoteId(null);
+    }
+  };
 
   return (
     <div className="grid flex-1 grid-cols-1 gap-4 p-4 overflow-hidden md:grid-cols-2">
@@ -31,18 +52,22 @@ const IntegratedEditor: React.FC = () => {
           <div>生成された楽譜</div>
           <MidiControls />
         </div>
-        <div className="flex-1 panel-body">
+        <div
+          className="flex-1 panel-body relative"
+          onClick={handleScoreAreaClick}
+        >
           <ScoreViewer
             className="h-full"
-            onNoteClick={setSelectedNoteId}
+            onNoteClick={handleNoteClick}
             onNoteMove={moveNoteByStep}
             selectedNoteId={selectedNoteId}
           />
-          {selectedNoteId && (
-            <div className="p-2 border-t border-gray-200 dark:border-gray-700">
-              <NoteDurationControls selectedNoteId={selectedNoteId} />
-            </div>
-          )}
+          <NoteDurationControls
+            selectedNoteId={selectedNoteId}
+            position={tooltipPos}
+            visible={tooltipVisible}
+            onClose={() => setTooltipVisible(false)}
+          />
         </div>
         <NotationControls onReset={handleReset} />
       </div>

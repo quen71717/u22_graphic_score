@@ -4,7 +4,7 @@ import "../styles/score.css";
 
 interface ScoreViewerProps {
   className?: string;
-  onNoteClick?: (noteId: string) => void;
+  onNoteClick?: (noteId: string, position: { x: number; y: number }) => void;
   onNoteMove?: (noteId: string, steps: number) => void;
   selectedNoteId?: string | null;
 }
@@ -43,13 +43,36 @@ const ScoreViewer: React.FC<ScoreViewerProps> = ({
       note.classList.add("cursor-pointer", "hover:opacity-80");
       note.addEventListener("click", (e) => {
         e.stopPropagation();
-        if (onNoteClick) onNoteClick(note.id);
+        if (onNoteClick) {
+          // SVG座標取得
+          const svgElem = svg as SVGSVGElement;
+          let x = 0,
+            y = 0;
+          if (svgElem && typeof note.getBoundingClientRect === "function") {
+            const noteRect = note.getBoundingClientRect();
+            const svgRect = svgElem.getBoundingClientRect();
+            x = noteRect.left - svgRect.left + noteRect.width / 2;
+            y = noteRect.bottom - svgRect.top; // 下端に表示
+          }
+          onNoteClick(note.id, { x, y });
+        }
       });
       note.addEventListener("mousedown", (event) => {
         const e = event as MouseEvent;
         dragState.current = { noteId: note.id, startY: e.clientY };
-        // ここでonNoteClickも呼ぶことで、ドラッグ開始時にも選択状態を即時反映
-        if (onNoteClick) onNoteClick(note.id);
+        if (onNoteClick) {
+          // SVG座標取得
+          const svgElem = svg as SVGSVGElement;
+          let x = 0,
+            y = 0;
+          if (svgElem && typeof note.getBoundingClientRect === "function") {
+            const noteRect = note.getBoundingClientRect();
+            const svgRect = svgElem.getBoundingClientRect();
+            x = noteRect.left - svgRect.left + noteRect.width / 2;
+            y = noteRect.bottom - svgRect.top;
+          }
+          onNoteClick(note.id, { x, y });
+        }
       });
     });
     const handleMouseMove = (e: MouseEvent) => {
