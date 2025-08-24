@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import verovio from "verovio";
 import { convertNotesToMEI } from "../utils/notationConverter";
+import { CANVAS_CONFIG } from "../components/DrawableCanvas";
 
 export type Coordinate = {
   x: number;
@@ -178,27 +179,59 @@ export const IntegratedScoreProvider: React.FC<{
     setScale((prevScale) => Math.max(prevScale - 5, 20));
   };
 
-  // 図形譜データから楽譜を生成
+  // // 図形譜データから楽譜を生成
+  // const generateScoreFromDrawing = () => {
+  //   if (!toolkit || drawnCoordinates.length === 0) return;
+
+  //   try {
+  //     // 座標を処理
+  //     const sortedCoords = [...drawnCoordinates].sort((a, b) => a.x - b.x);
+
+  //     // 間引きと音符情報への変換
+  //     const downsampledCoords = downsampleCoordinates(sortedCoords);
+  //     const notes = downsampledCoords.map((coord) => {
+  //       return calculateNoteInfo(coord);
+  //     });
+
+  //     setProcessedNotes(notes);
+
+  //     // MEIデータに変換
+  //     const mei = convertNotesToMEI(notes);
+  //     setScoreData(mei);
+
+  //     console.log("Generated score from drawing:", notes);
+  //   } catch (error) {
+  //     console.error("Error generating score:", error);
+  //   }
+  // };
   const generateScoreFromDrawing = () => {
     if (!toolkit || drawnCoordinates.length === 0) return;
 
     try {
-      // 座標を処理
-      const sortedCoords = [...drawnCoordinates].sort((a, b) => a.x - b.x);
+      // 行ごとに座標をグループ化
+      const staffGroups: Coordinate[][] = [];
+      for (let i = 0; i < CANVAS_CONFIG.numStavesRow; i++) {
+        const yStart = CANVAS_CONFIG.initialY + i * CANVAS_CONFIG.staffInterval;
+        const yEnd = yStart + CANVAS_CONFIG.lineInterval * 4;
+        staffGroups.push(
+          drawnCoordinates.filter(coord => coord.y >= yStart && coord.y <= yEnd)
+        );
+      }
 
-      // 間引きと音符情報への変換
-      const downsampledCoords = downsampleCoordinates(sortedCoords);
-      const notes = downsampledCoords.map((coord) => {
-        return calculateNoteInfo(coord);
+      // 各行ごとに音符情報へ変換
+      const notesByStaff: NoteInfo[][] = staffGroups.map(group => {
+        const sortedCoords = [...group].sort((a, b) => a.x - b.x);
+        const downsampledCoords = downsampleCoordinates(sortedCoords);
+        return downsampledCoords.map(coord => calculateNoteInfo(coord));
       });
 
-      setProcessedNotes(notes);
+      setProcessedNotes(notesByStaff.flat());
 
-      // MEIデータに変換
-      const mei = convertNotesToMEI(notes);
+      // MEIデータに変換（複数staff対応版）
+      const mei = convertNotesToMEI(notesByStaff.flat());
       setScoreData(mei);
 
-      console.log("Generated score from drawing:", notes);
+      console.log("Generated score from drawing:", notesByStaff);
     } catch (error) {
       console.error("Error generating score:", error);
     }
@@ -208,7 +241,7 @@ export const IntegratedScoreProvider: React.FC<{
   const downsampleCoordinates = (coords: Coordinate[]): Coordinate[] => {
     if (coords.length === 0) return [];
 
-    const NOTE_MIN_INTERVAL = 50;
+    const NOTE_MIN_INTERVAL = 13;
     const sample: Coordinate[] = [coords[0]];
     let lastX = coords[0].x;
 
