@@ -9,23 +9,19 @@ interface DrawableCanvasProps {
 export const CANVAS_CONFIG = {
   width: 1000,
   height: 2000,
-  trebleClefImagePath: "/images/20131.png",
+  trebleClefImagePath: "/clef.png",
   initialY: 50, // 最初の五線譜のy座標
   lineInterval: 10, // 五線譜の線間隔
   staffInterval: 200, // 五線譜間の縦間隔
   staffYInterval: 170, // 五線譜間の横間隔
   // numStaves: 4,  // 五線譜の数
-  numStavesRow: 1,         // 行数（縦の段数）
-  numStavesCol: 4,         // 列数（横の五線譜数）
+  numStavesRow: 2, // 行数（縦の段数）
+  numStavesCol: 3, // 列数（横の五線譜数）
   clefX: 30, //ト音記号のx座標
-
-
 };
 
-const DrawableCanvas: React.FC<DrawableCanvasProps> = ({
-  resetKey,
-}) => {
-  const { drawnCoordinates, setDrawnCoordinates, generateScoreFromDrawing } =
+const DrawableCanvas: React.FC<DrawableCanvasProps> = ({ resetKey }) => {
+  const { setDrawnCoordinates, generateScoreFromDrawing } =
     useIntegratedScore();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -80,20 +76,14 @@ const DrawableCanvas: React.FC<DrawableCanvasProps> = ({
   );
 
   // 五線譜の描画
-  const drawFiveLinedStaff = useCallback(
-    (ctx: CanvasRenderingContext2D, startY: number) => {
-      for (let i = 0; i < 5; i++) {
-        drawHorizontalLine(ctx, startY + i * CANVAS_CONFIG.lineInterval);
-      }
-    },
-    [drawHorizontalLine]
-  );
   const drawStaffWithClef = useCallback(
     (ctx: CanvasRenderingContext2D) => {
       for (let row = 0; row < CANVAS_CONFIG.numStavesRow; row++) {
         for (let col = 0; col < CANVAS_CONFIG.numStavesCol; col++) {
-          const currentStaffX = CANVAS_CONFIG.clefX + col * CANVAS_CONFIG.staffYInterval;
-          const currentStaffY = CANVAS_CONFIG.initialY + row * CANVAS_CONFIG.staffInterval;
+          const currentStaffX =
+            CANVAS_CONFIG.clefX + col * CANVAS_CONFIG.staffYInterval;
+          const currentStaffY =
+            CANVAS_CONFIG.initialY + row * CANVAS_CONFIG.staffInterval;
 
           // 五線譜を横に描画
           for (let j = 0; j < 5; j++) {
